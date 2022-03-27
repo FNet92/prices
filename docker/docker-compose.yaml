@@ -1,0 +1,47 @@
+version: '3.4'
+
+networks:
+  proxynetwork:
+    external:
+      name: proxynetwork
+  pricesdbnetwork:
+    driver: bridge
+
+services:
+  api:
+    container_name: prices_api
+    image: prices/master
+    command: ["api"]
+    depends_on:
+      - db
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-'false'}
+      APP_KEY: ${APP_KEY:-base64:YCDn9otw6Hk8dRx9J7dqYqobutRqp1q64VHSVI3CNuc=}
+      DB_HOST: db
+      DB_DATABASE: dbname
+      DB_USERNAME: dbuser
+      DB_PASSWORD: secret
+      VIRTUAL_HOST: api.prices.${TLD:-localhost}
+    networks:
+      - pricesdbnetwork
+      - proxynetwork
+    external_links:
+      - proxy:api.prices.${TLD:-localhost}
+
+  db:
+    container_name: prices_db
+    image: mysql/mysql-server:5.7
+    environment:
+      MYSQL_DATABASE: dbname
+      MYSQL_USER: dbuser
+      MYSQL_PASSWORD: secret
+    volumes:
+      - db-volume:/var/lib/mysql
+    networks:
+      - pricesdbnetwork
+    ports:
+      - "3306:3306"
+
+volumes:
+  db-volume:
