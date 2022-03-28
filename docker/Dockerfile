@@ -30,7 +30,7 @@ RUN printf 'deb [signed-by=/usr/share/keyrings/nginx-keyring.gpg] https://packag
 
 RUN apt update
 
-RUN apt install unit php-cli php-pdo php-json unit-php -y -q
+RUN apt install unit php-cli php-pdo php-json php-xml php-mbstring unit-php -y -q
 RUN apt install php8.0-mysql -y -q
 
 ADD docker/unit.conf.json /var/lib/unit/conf.json
