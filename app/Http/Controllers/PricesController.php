@@ -20,20 +20,22 @@ class PricesController extends Controller
 
     public function update(PricesUpdateRequest $request, Product $product): SuccessResponseResource
     {
-        $product->prices()->delete();
+        $currentMicroTime = (int) (microtime(true) * 10000);
 
-        foreach (array_chunk($request->prices, 200) as $prices) {
-            $pricesBatchInsert = array_map(function($price) use ($product) {
-                return [
-                    'guid' => $price['guid'],
-                    'amount' => $price['price'],
-                    'product_guid' => $product->guid
-                ];
-            }, $prices);
+        $upserts = array_map(function($price) use ($currentMicroTime, $product) {
+            return [
+                'guid' => $price['guid'],
+                'amount' => $price['price'],
+                'product_guid' => $product->guid,
+                'last_updated_at' => $currentMicroTime
+            ];
+        }, $request->prices);
 
-            Price::insert($pricesBatchInsert);
-        }
+        Price::upsert($upserts, ['guid', 'product_guid'], ['amount', 'last_updated_at']);
 
+        Price::where('product_guid', $product->guid)
+            ->where('last_updated_at', '<', $currentMicroTime)
+            ->delete();
 
         return new SuccessResponseResource([]);
     }

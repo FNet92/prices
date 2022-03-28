@@ -13,6 +13,7 @@ return new class extends Migration
             $table->uuid('guid')->primary();
             $table->float('amount');
             $table->uuid('product_guid');
+            $table->unsignedBigInteger('last_updated_at');
 
             $table->foreign('product_guid')->references('guid')->on('products')->onDelete('cascade');
         });

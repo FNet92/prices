@@ -13,7 +13,8 @@ class PriceFactory extends Factory
     {
         return [
             'guid' => $this->faker->unique()->uuid(),
-            'amount' => $this->faker->numberBetween(100, 50000000) / 100
+            'amount' => $this->faker->numberBetween(100, 50000000) / 100,
+            'last_updated_at' => 0
         ];
     }
 }
